@@ -32,6 +32,7 @@ import com.zxing.view.ViewfinderView;
  * Initial the camera
  * @author Ryan.Tang
  */
+//SurfaceHolder.java中public interface Callback{}
 public class CaptureActivity extends Activity implements Callback {
 
 	private CaptureActivityHandler handler;
@@ -52,7 +53,7 @@ public class CaptureActivity extends Activity implements Callback {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.capture);
 		//ViewUtil.addTopView(getApplicationContext(), this, R.string.scan_card);
-		CameraManager.init(getApplication());
+		CameraManager.init(getApplication());    //摄像头管理类初始化
 		viewfinderView = (ViewfinderView) findViewById(R.id.viewfinder_view);
 		cancelScanButton = (Button) this.findViewById(R.id.btn_cancel_scan);
 		hasSurface = false;

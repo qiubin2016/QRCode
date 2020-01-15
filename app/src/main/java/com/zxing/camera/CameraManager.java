@@ -117,7 +117,7 @@ public final class CameraManager {
    */
   public void openDriver(SurfaceHolder holder) throws IOException {
     if (camera == null) {
-      camera = Camera.open();
+      camera = Camera.open();  //打开后置摄像头
       if (camera == null) {
         throw new IOException();
       }
@@ -131,7 +131,7 @@ public final class CameraManager {
 
       //FIXME
  //     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-      //�Ƿ�ʹ��ǰ��
+      //�Ƿ�ʹ��ǰ��
 //      if (prefs.getBoolean(PreferencesActivity.KEY_FRONT_LIGHT, false)) {
 //        FlashlightManager.enableFlashlight();
 //      }
