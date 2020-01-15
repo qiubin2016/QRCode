@@ -13,6 +13,7 @@ import android.media.MediaPlayer.OnCompletionListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
@@ -24,6 +25,7 @@ import android.widget.Toast;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.Result;
 import com.qrcode.R;
+import com.zxing.camera.CameraConfigurationManager;
 import com.zxing.camera.CameraManager;
 import com.zxing.decoding.CaptureActivityHandler;
 import com.zxing.decoding.InactivityTimer;
@@ -34,6 +36,7 @@ import com.zxing.view.ViewfinderView;
  */
 //SurfaceHolder.java中public interface Callback{}
 public class CaptureActivity extends Activity implements Callback {
+	private static final String TAG = CaptureActivity.class.getSimpleName();
 
 	private CaptureActivityHandler handler;
 	private ViewfinderView viewfinderView;
@@ -58,6 +61,7 @@ public class CaptureActivity extends Activity implements Callback {
 		cancelScanButton = (Button) this.findViewById(R.id.btn_cancel_scan);
 		hasSurface = false;
 		inactivityTimer = new InactivityTimer(this);
+		Log.i(TAG, "=======onCreate");
 	}
 
 	@Override
@@ -66,9 +70,9 @@ public class CaptureActivity extends Activity implements Callback {
 		SurfaceView surfaceView = (SurfaceView) findViewById(R.id.preview_view);
 		SurfaceHolder surfaceHolder = surfaceView.getHolder();
 		if (hasSurface) {
-			initCamera(surfaceHolder);
+			initCamera(surfaceHolder);    //初始化摄像头
 		} else {
-			surfaceHolder.addCallback(this);
+			surfaceHolder.addCallback(this);    //添加回调
 			surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 		}
 		decodeFormats = null;
@@ -76,12 +80,14 @@ public class CaptureActivity extends Activity implements Callback {
 
 		playBeep = true;
 		AudioManager audioService = (AudioManager) getSystemService(AUDIO_SERVICE);
+		//audioService.getRingerMode()--返回当前的铃声模式
 		if (audioService.getRingerMode() != AudioManager.RINGER_MODE_NORMAL) {
-			playBeep = false;
+			playBeep = false;  //铃声模式不是正常（即，静音或震动），标志清空
 		}
 		initBeepSound();
 		vibrate = true;
-		
+
+		//cancel按键的监听，按下则退出当前activity
 		//quit the scan view
 		cancelScanButton.setOnClickListener(new OnClickListener() {
 			
@@ -178,17 +184,20 @@ public class CaptureActivity extends Activity implements Callback {
 		viewfinderView.drawViewfinder();
 
 	}
-
+    //可参考：https://blog.csdn.net/dyllove98/article/details/8799249
 	private void initBeepSound() {
+		//playBeep:true--铃声模式是正常（即，非静音或震动）
 		if (playBeep && mediaPlayer == null) {
 			// The volume on STREAM_SYSTEM is not adjustable, and users found it
 			// too loud,
 			// so we now play on the music stream.
+            //为activity注册的默认 音频通道,声明为 STREAM_MUSIC的通道，就是多媒体播放
 			setVolumeControlStream(AudioManager.STREAM_MUSIC);
+			//初始化MediaPlayer对象，指定播放的声音通道为 STREAM_MUSIC
 			mediaPlayer = new MediaPlayer();
 			mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-			mediaPlayer.setOnCompletionListener(beepListener);
-
+			mediaPlayer.setOnCompletionListener(beepListener);  //设置播放完成的回调
+			//从资源文件取音频文件,设定数据源，并准备播放
 			AssetFileDescriptor file = getResources().openRawResourceFd(
 					R.raw.beep);
 			try {
@@ -220,7 +229,7 @@ public class CaptureActivity extends Activity implements Callback {
 	 */
 	private final OnCompletionListener beepListener = new OnCompletionListener() {
 		public void onCompletion(MediaPlayer mediaPlayer) {
-			mediaPlayer.seekTo(0);
+			mediaPlayer.seekTo(0);  //当播放完毕一次后，重新指向流文件的开头，以准备下次播放。
 		}
 	};
 
